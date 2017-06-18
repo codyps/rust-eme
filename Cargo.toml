@@ -6,4 +6,8 @@ license = "Apache-2.0 OR MIT"
 repository = "https://github.com/jmesmon/eme"
 
 [dependencies]
-aesti = "*"
+aesti = { optional = false, version = "*" }
+index-fixed = "*"
+
+[dev-dependencies]
+fmt-extra = "*"
