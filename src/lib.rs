@@ -1,38 +1,44 @@
 #![no_std]
 
-/// EME (ECB-Mix-ECB) constructs a block cipher with a larger block size from a block cipher with a
-/// smaller block size.
-///
-/// It uses a block cipher to create a tweakable cipher.
-///
-/// C: cipher text
-/// P: public text
-/// K: secret key
-/// T: tweak
-///
-/// C = E(T, K, P)
-/// P = D(T, K, C)
-///
-/// k: bits in secret key (K)
-/// n: bits per block in the chosen block cipher. Also specifies the used GF(2**n) field.
-/// mn: plain text & cipher text size
-/// m: tweak bits, number of blocks in E,D used
-///
-/// m is one of 1..n
-///
-/// EME-32-AES is a specification of EME with parameters fixed:
-///
-///  - E,D = aes-256-cbc
-///  - n = 128 (bits), 16 bytes
-///  - m = 32
-///  - (derived) message (text) size = 512 bytes
-///
-/// Our implimentation has the following fixed parameters:
-///
-///  - n = 128 (bits), 16 bytes
-///
-///
-/// [EME-32-AES draft spec](http://grouper.ieee.org/groups/1619/email/pdf00020.pdf)
+//! EME (ECB-Mix-ECB) constructs a block cipher with a larger block size from a block cipher with a
+//! smaller block size.
+//!
+//! It uses a block cipher to create a tweakable cipher.
+//!
+//! C: cipher text
+//! P: public text
+//! K: secret key
+//! T: tweak
+//!
+//! C = E(T, K, P)
+//! P = D(T, K, C)
+//!
+//! k: bits in secret key (K)
+//! n: bits per block in the chosen block cipher. Also specifies the used GF(2**n) field.
+//! mn: plain text & cipher text size
+//! m: tweak bits, number of blocks in E,D used
+//!
+//! m is one of 1..n
+//!
+//! EME-32-AES is a specification of EME with parameters fixed:
+//!
+//!  - E,D = aes-256-cbc
+//!  - n = 128 (bits), 16 bytes
+//!  - m = 32
+//!  - (derived) message (text) size = 512 bytes
+//!
+//! Our implimentation has the following fixed parameters:
+//!
+//!  - n = 128 (bits), 16 bytes
+//!
+//!
+//! [EME-32-AES draft spec](http://grouper.ieee.org/groups/1619/email/pdf00020.pdf)
+//!
+//! [eme in go](https://github.com/rfjakob/eme)
+//!
+//! [Patent (assigned to NSF)](https://www.google.com/patents/US20040131182)
+//!
+//! [Email regarding supposed patent abandonment](http://grouper.ieee.org/groups/1619/email-2/msg00005.html)
 
 extern crate aesti;
 
@@ -53,13 +59,13 @@ trait Block {
 /// multByTwo proceedure from the EME-32-AES draft spec
 fn mult_by_2(out: &mut [u8;16], input: &[u8;16])
 {
-    out[0] = 2 * input[0];
+    out[0] = input[0].wrapping_mul(2);
     if input[15] >= 128 {
         out[0] ^= 135;
     }
 
     for j in 1..16 {
-        out[j] = 2 * input[j];
+        out[j] = input[j].wrapping_mul(2);
         if input[j-1] >= 128 {
             out[j] += 1;
         }
